@@ -1,8 +1,8 @@
 /**
  * @Author       : Xiao Xiang Lun
- * @Date         : 2023-08-01 17:15:55
+ * @Date         : 2023-08-01 18:18:06
  * @LastEditors  : snowlove xiaoxl@botech.com.cn
- * @LastEditTime : 2023-08-01 17:15:59
+ * @LastEditTime : 2023-08-01 18:18:10
  * @FilePath     : /js/keyboard.es.js
  * @Environment  : mac node v16.3.0
  * @Description  : 
@@ -1583,7 +1583,10 @@ class SnowKeyboard {
     this.fnKeyMap.set(KeyCode.TAB, this.tabEvent);
     this.fnKeyMap.set(KeyCode.CAPSLOCK, this.capslockEvent);
     this.fnKeyMap.set(KeyCode.ENTER, this.enterEvent);
-    this.fnKeyMap.set(KeyCode.SHIFT, this.shfitEvent);
+    this.fnKeyMap.set(
+      KeyCode.SHIFT,
+      (e) => this.shfitEvent({ ...e, initShift: -1 })
+    );
     this.fnKeyMap.set(KeyCode.DELETE, this.deleteEvent);
     this.fnKeyMap.set(KeyCode.SPACE, this.spaceEvent);
     this.fnKeyMap.set(KeyCode.LEFT, this.leftEvent);
@@ -1643,16 +1646,36 @@ class SnowKeyboard {
     }
   }
   // 初始化shfit功能键事件
-  shfitEvent() {
-    var _a;
+  // {
+  //   initShift: -1
+  // }:{
+  //   initShift:boolean | number;
+  // }
+  shfitEvent({
+    initShift = -1
+  }) {
+    var _a, _b;
+    console.log("shfitEvent", initShift, this.isDigital, this.shiftMode);
     if (this.isDigital) {
-      (_a = this.digitalKeyboard) == null ? void 0 : _a.toggleShiftKeys(
-        this.capslockMode ? this.shiftMode = this.capslockMode = false : this.shiftMode = !this.shiftMode
-      );
-    } else
-      this.keyboard.toggleShiftKeys(
-        this.capslockMode ? this.shiftMode = this.capslockMode = false : this.shiftMode = !this.shiftMode
-      );
+      if (initShift !== -1) {
+        (_a = this.digitalKeyboard) == null ? void 0 : _a.toggleShiftKeys(
+          this.capslockMode ? this.shiftMode = this.capslockMode = initShift : this.shiftMode = initShift
+        );
+      } else
+        (_b = this.digitalKeyboard) == null ? void 0 : _b.toggleShiftKeys(
+          this.capslockMode ? this.shiftMode = this.capslockMode = false : this.shiftMode = !this.shiftMode
+        );
+      console.log("this.shiftMode", this.shiftMode, this.capslockMode);
+    } else {
+      if (initShift !== -1) {
+        this.keyboard.toggleShiftKeys(
+          this.capslockMode ? this.shiftMode = this.capslockMode = initShift : this.shiftMode = initShift
+        );
+      } else
+        this.keyboard.toggleShiftKeys(
+          this.capslockMode ? this.shiftMode = this.capslockMode = false : this.shiftMode = !this.shiftMode
+        );
+    }
   }
   // 初始化delete功能键事件
   deleteEvent() {
@@ -1715,13 +1738,14 @@ class SnowKeyboard {
     if (this.mode === ModeType["DIGITAL"]) {
       this.layout = digitalLayout;
       this.dictionary = null;
-      this.shfitEvent();
+      this.shfitEvent({ initShift: false });
       (_a = this.digitalKeyboard) == null ? void 0 : _a.toggleDigitalKeyboardShow(true);
       this.keyboard.toggleKeyboardShow(false);
     } else if (this.mode === ModeType["FULL"]) {
       const [layout, dictionary] = this.getLayoutAndDictionary(this.type);
       this.layout = layout;
       this.dictionary = dictionary;
+      this.shfitEvent({ initShift: false });
       (_b = this.digitalKeyboard) == null ? void 0 : _b.toggleDigitalKeyboardShow(false);
       this.keyboard.toggleKeyboardShow(true);
     }
